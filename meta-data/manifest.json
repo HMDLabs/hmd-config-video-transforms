@@ -1,0 +1,33 @@
+{
+  "name": "hmd-config-video-transforms",
+  "description": "NeuronSphere Transform YAMLs for running video manipulation transform images",
+  "project_type": {
+    "name": "Transform Config",
+    "facets": [
+      "default_repo",
+      "transform_config_repo"
+    ]
+  },
+  "build": {
+    "commands": [
+      [
+        "transform"
+      ]
+    ]
+  },
+  "deploy": {
+    "commands": [
+      [
+        "transform"
+      ]
+    ],
+    "dependencies": {
+      "ms-transform": {
+        "repo_class_name": "hmd-ms-transform",
+        "required": "true",
+        "version_spec": "~=0.1.276"
+      }
+    },
+    "default_configuration": {}
+  }
+}

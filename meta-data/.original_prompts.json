@@ -1,0 +1,13 @@
+{
+  "_org": "hmd",
+  "_repo_type": "config-",
+  "short_name": "video-transforms",
+  "project_name": "hmd-config-video-transforms",
+  "repo_name": "hmd-config-video-transforms",
+  "description": "NeuronSphere Transform YAMLs for running video manipulation transform images",
+  "_author": "Alex Burgoon",
+  "_author_email": "alex.burgoon@hmdlabs.io",
+  "__test_name": "01_video_transforms",
+  "_template": "/tmp/tmpumcr7a2c/hmd_cli_repo",
+  "_output_dir": "/home/aburg/hmd-public-examples/projects"
+}
