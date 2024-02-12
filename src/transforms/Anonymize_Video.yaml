@@ -1,11 +1,9 @@
-# Example Provider Transform
-# Edit or delete
 type: image_sequence
 query_config:
   query_name: by_content_item_type_transform_name
   query_value:
-    item_type: example_source_csv
-    tf_name: example_img_sequence
+    item_type: processed_disc_golf_throw_video
+    tf_name: Anonymize_Video
 config:
   image_sequence:
     - name: download-content-item
@@ -14,25 +12,24 @@ config:
         HMD_ENVIRONMENT: default
         HMD_CUSTOMER_CODE: default
         HMD_AUTH_TOKEN: default
-        TARGET_LIBRARIAN: device
+        TARGET_LIBRARIAN: videos
         SYNC_DIRECTION: pull
         CONTENT_ITEM_PATH: entity.content_item_path
-        FILE_PATH: "/hmd_transform/input/{source_path[1]}/{source_path[2]}/{source_path[3]}"
-        hmd_device_librarian_url: default
-        hmd_device_librarian_key: default
+        FILE_PATH: "/hmd_transform/input/videos/{source_path[-1]}"
+        hmd_videos_librarian_url: default
+        hmd_videos_librarian_key: default
       cmd: ["python"]
       args: ["entrypoint.py"]
       volumes:
         input: /hmd_transform/input/
         output: /hmd_transform/output/
-    - name: convert-csv
-      image_name: ghcr.io/neuronsphere/hmd-tf-example:0.1.1
+    - name: blur-faces
+      image_name: ghcr.io/neuronsphere/hmd-tf-video-blurring:0.1.1
       env:
-        INPUT_PATH: "/hmd_transform/input/{source_path[1]}/{source_path[2]}/{source_path[3]}"
-        OUTPUT_PATH: "/hmd_transform/output/{source_path[1]}/{source_path[2]}/{source_path[3]}.parquet"
         HMD_ENVIRONMENT: default
         HMD_CUSTOMER_CODE: default
         HMD_AUTH_TOKEN: default
+        TRANSFORM_INSTANCE_CONTEXT: {}
       cmd: ["python"]
       args: ["entrypoint.py"]
       volumes:
@@ -44,13 +41,13 @@ config:
         HMD_ENVIRONMENT: default
         HMD_CUSTOMER_CODE: default
         HMD_AUTH_TOKEN: default
-        TARGET_LIBRARIAN: datalake
+        TARGET_LIBRARIAN: videos
         SYNC_DIRECTION: push
-        CONTENT_ITEM_PATH: device_data:/{source_path[1]}/{source_path[3]}.parquet
-        CONTENT_ITEM_TYPE: device_results_parquet
-        FILE_PATH: "/hmd_transform/output/{source_path[1]}/{source_path[2]}/{source_path[3]}.parquet"
-        hmd_datalake_librarian_url: default
-        hmd_datalake_librarian_key: default
+        CONTENT_ITEM_PATH: anon:/{source_path[1]}/{source_path[-1]}
+        CONTENT_ITEM_TYPE: anonymized_disc_golf_throw_video
+        FILE_PATH: "/hmd_transform/output/out_videos/{source_path[-1]}"
+        hmd_videos_librarian_url: default
+        hmd_videos_librarian_key: default
       cmd: ["python"]
       args: ["entrypoint.py"]
       volumes:

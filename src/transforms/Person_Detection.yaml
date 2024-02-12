@@ -1,0 +1,89 @@
+type: image_sequence
+query_config:
+  query_name: by_content_item_type_transform_name
+  query_value:
+    item_type: disc_golf_throw_video
+    tf_name: Person_Detection
+config:
+  image_sequence:
+    - name: download-content-item
+      image_name: ghcr.io/neuronsphere/hmd-img-content-item-sync:0.1.5
+      env:
+        HMD_ENVIRONMENT: default
+        HMD_CUSTOMER_CODE: default
+        HMD_AUTH_TOKEN: default
+        TARGET_LIBRARIAN: videos
+        SYNC_DIRECTION: pull
+        CONTENT_ITEM_PATH: entity.content_item_path
+        FILE_PATH: "/hmd_transform/input/video/{source_path[-1]}"
+        hmd_videos_librarian_url: default
+        hmd_videos_librarian_key: default
+      cmd: ["python"]
+      args: ["entrypoint.py"]
+      volumes:
+        input: /hmd_transform/input/
+        output: /hmd_transform/output/
+    - name: frame-extraction
+      image_name: ghcr.io/neuronsphere/hmd-tf-frame-extraction:0.1.1
+      env:
+        HMD_ENVIRONMENT: default
+        HMD_CUSTOMER_CODE: default
+        HMD_AUTH_TOKEN: default
+        TRANSFORM_INSTANCE_CONTEXT:
+          notebook: "frame_extraction.ipynb"
+          params: {}
+      cmd: ["python"]
+      args: ["entrypoint.py"]
+      volumes:
+        input: /hmd_transform/input/
+        output: /hmd_transform/output/
+    - name: person-detection
+      image_name: ghcr.io/neuronsphere/hmd-tf-frame-extraction:0.1.1
+      env:
+        HMD_ENVIRONMENT: default
+        HMD_CUSTOMER_CODE: default
+        HMD_AUTH_TOKEN: default
+        TRANSFORM_INSTANCE_CONTEXT:
+          notebook: "object_detection.ipynb"
+          params:
+            images_path: "/hmd_transform/output/images/{source_path[-1]}/"
+            images_out_path: "/hmd_transform/output/images-out/{source_path[-1]}/"
+      cmd: ["python"]
+      args: ["entrypoint.py"]
+      volumes:
+        input: /hmd_transform/input/
+        output: /hmd_transform/output/
+    - name: create-video
+      image_name: ghcr.io/neuronsphere/hmd-tf-frame-extraction:0.1.1
+      env:
+        HMD_ENVIRONMENT: default
+        HMD_CUSTOMER_CODE: default
+        HMD_AUTH_TOKEN: default
+        TRANSFORM_INSTANCE_CONTEXT:
+          notebook: "create_video.ipynb"
+          params:
+            images_path: "/hmd_transform/output/images-out/{source_path[-1]}/"
+            video_path: "/hmd_transform/output/video-out/"
+      cmd: ["python"]
+      args: ["entrypoint.py"]
+      volumes:
+        input: /hmd_transform/input/
+        output: /hmd_transform/output/
+    - name: upload-content-item
+      image_name: ghcr.io/neuronsphere/hmd-img-content-item-sync:0.1.5
+      env:
+        HMD_ENVIRONMENT: default
+        HMD_CUSTOMER_CODE: default
+        HMD_AUTH_TOKEN: default
+        TARGET_LIBRARIAN: videos
+        SYNC_DIRECTION: push
+        CONTENT_ITEM_PATH: processed:/{source_path[1]}/{source_path[-1]}
+        CONTENT_ITEM_TYPE: processed_disc_golf_throw_video
+        FILE_PATH: "/hmd_transform/output/video-out/video.avi"
+        hmd_videos_librarian_url: default
+        hmd_videos_librarian_key: default
+      cmd: ["python"]
+      args: ["entrypoint.py"]
+      volumes:
+        input: /hmd_transform/input/
+        output: /hmd_transform/output/
